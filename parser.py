@@ -16,23 +16,25 @@ class MyParser:
 	
 	def create_scanner(self,fp):
 		
-		""" Creates a plex scanner for a particular grammar 
-		to operate on file object fp. """
+		# create and store the scanner object
+		self.scanner = plex.Scanner(self.LEXICON, fp)
+		# get initial lookahead
+       		self.la, self.text = self.next_token()
 		
-		def __init__(self):
-			letter = plex.Range("Azaz")
-			digit  = plex.Range("09")
-			binary = plex.Range("01")
-			id_token= letter + plex.Rep(letter|digit)
-      		        and = plex.Str('and')
-        		or= plex.Str('or')
-        		xor = plex.Str('xor')
-        		equals = plex.Str('=')
-        		open_parenthesis= plex.Str('(')
-        		close_parenthesis= plex.Str(')')
-        		print_token = plex.Str('print')
-        		space = plex.Any(' \n\t')
-			binary_num = Rep1(binary)
+	def __init__(self):
+		letter = plex.Range("Azaz")
+		digit  = plex.Range("09")
+		binary = plex.Range("01")
+		id_token= letter + plex.Rep(letter|digit)
+      		and = plex.Str('and')
+        	or= plex.Str('or')
+        	xor = plex.Str('xor')
+        	equals = plex.Str('=')
+        	open_parenthesis= plex.Str('(')
+        	close_parenthesis= plex.Str(')')
+        	print_token = plex.Str('print')
+        	space = plex.Any(' \n\t')
+		binary_num = Rep1(binary)
 		
 
 		# the scanner lexicon - constructor argument is a list of (pattern,action ) tuples
@@ -46,17 +48,10 @@ class MyParser:
                                              (close_parenthesis, ')'),
                                              (binary_num, 'b_num'),
                                              (id_token, 'id')])
-		
-		# create and store the scanner object
-		self.scanner = plex.Scanner(lexicon,fp)
-		
-		# get initial lookahead
-		self.la,self.val = self.next_token()
-
+				
 
 	def next_token(self):
 		""" Returns tuple (next_token,matched-text). """
-		
 		return self.scanner.read()		
 
 	
@@ -72,7 +67,7 @@ class MyParser:
 		Raises ParseError if anything else is found. Acquires new lookahead. """ 
 		
 		if self.la==token:
-			self.la,self.val = self.next_token()
+			self.la,self.text = self.next_token()
 		else:
 			raise ParseError("found {} instead of {}".format(self.la,token))
 	
