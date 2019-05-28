@@ -46,7 +46,7 @@ class MyParser:
                                              (print_token, 'print'),
                                              (open_parenthesis, '('),
                                              (close_parenthesis, ')'),
-                                             (binary_num, 'b_num'),
+                                             (binary_num, 'binary_num'),
                                              (id_token, 'id')])
 				
 
