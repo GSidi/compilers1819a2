@@ -10,27 +10,42 @@ class ParseError(Exception):
 
 
 class MyParser:
+	
 	""" A class encapsulating all parsing functionality
 	for a particular grammar. """
 	
 	def create_scanner(self,fp):
+		
 		""" Creates a plex scanner for a particular grammar 
 		to operate on file object fp. """
-
-		# define some pattern constructs
-		letter = plex.Range("AZaz")
-		digit = plex.Range("09")
-
-		string = plex.Rep1(letter | digit)
-		operator = plex.Any("!?()")		
-		space = plex.Any(" \t\n")
+		
+		def __init__(self):
+			letter = plex.Range("Azaz")
+			digit  = plex.Range("09")
+			binary = plex.Range("01")
+			id_token= letter + plex.Rep(letter|digit)
+      		        and = plex.Str('and')
+        		or= plex.Str('or')
+        		xor = plex.Str('xor')
+        		equals = plex.Str('=')
+        		open_parenthesis= plex.Str('(')
+        		close_parenthesis= plex.Str(')')
+        		print_token = plex.Str('print')
+        		space = plex.Any(' \n\t')
+			binary_num = Rep1(binary)
+		
 
 		# the scanner lexicon - constructor argument is a list of (pattern,action ) tuples
-		lexicon = plex.Lexicon([
-			(operator,plex.TEXT),
-			(space,plex.IGNORE),
-			(string, 'string')
-			])
+		self.LEXICON = plex.Lexicon([(space, plex.IGNORE),
+                                    	     (and, 'and'),
+                                             (or, 'or'),
+                                             (xor, 'xor'),
+                                             (equals, '='),
+                                             (print_token, 'print'),
+                                             (open_parenthesis, '('),
+                                             (close_parenthesis, ')'),
+                                             (binary_num, 'b_num'),
+                                             (id_token, 'id')])
 		
 		# create and store the scanner object
 		self.scanner = plex.Scanner(lexicon,fp)
