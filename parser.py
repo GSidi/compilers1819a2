@@ -115,13 +115,51 @@ class MyParser:
            		 raise ParseError("{} wasn't an 'xor', 'id', 'print' or ')' token!".format(self.la))
 
    	 def term(self):
-        	if self.LA in ("(","id", "binary_num"):
+        	if self.la in ("(","id", "binary_num"):
            		 self.factor()
             		 self.factor_tail()
        		 else:
 			raise ParseError("{} wasn't an '(', 'id' or 'binary_num' token!".format(self.la))
 
+	 def factor_tail(self):
+      		  if self.la == "or":
+          		  self.match("or")
+            		  self.factor()
+           		  self.factor_tail()
+      		  elif self.la in ("xor", "id", "print", ")", None):
+            			return
+       		  else:
+         		   raise ParseError("{} wasn't an 'xor', 'id', 'print' or ')' token!".format(self.la))
 
+    	def factor(self):
+        	if self.la in ("(", "id", "binary_num"):
+           		 self.atom()
+           		 self.atom_tail()
+      	        else:
+           		raise ParseError("{} wasn't an '(', 'id' or 'binary_num' token!".format(self.la))
+	
+					 
+       def atom_tail(self):
+        	if self.la == "and":
+           		 self.match("and")
+            		 self.atom()
+            		 self.atom_tail()
+        	elif self.LA in ("xor", "or", "print", "id", ")", None):
+           		 return
+       		 else:
+            		raise ParseError("{} was not what i expected!".format(self.la))
+
+        def atom(self):
+       		 if self.la == "(":
+           		 self.match("(")
+            		 self.expr()
+            		 self.match(")")
+        	 elif self.la == ("id"):
+          		 self.match("id")
+       		 elif self.la == ("binary_num"):
+            		 self.match("binary_num")
+        	 else:
+            raise ParseError("{} wasn't an '(', 'id' or 'binary_num' token!".format(self.la))
 		
 # the main part of prog
 
@@ -129,7 +167,7 @@ class MyParser:
 parser = MyParser()
 
 # open file for parsing
-with open("recursive-descent-parsing.txt","r") as fp:
+with open("test.txt") as fp:
 
 	# parse file
 	try:
