@@ -26,8 +26,8 @@ class MyParser:
 		digit  = plex.Range("09")
 		binary = plex.Range("01")
 		id_token= letter + plex.Rep(letter|digit)
-      		and = plex.Str('and')
-        	or= plex.Str('or')
+      		and_token = plex.Str('and')
+        	or_token= plex.Str('or')
         	xor = plex.Str('xor')
         	equals = plex.Str('=')
         	open_parenthesis= plex.Str('(')
@@ -39,8 +39,8 @@ class MyParser:
 
 		# the scanner lexicon - constructor argument is a list of (pattern,action ) tuples
 		self.LEXICON = plex.Lexicon([(space, plex.IGNORE),
-                                    	     (and, 'and'),
-                                             (or, 'or'),
+                                    	     (and_token, 'and'),
+                                             (or_token, 'or'),
                                              (xor, 'xor'),
                                              (equals, '='),
                                              (print_token, 'print'),
@@ -83,18 +83,15 @@ class MyParser:
 	
 			
 	def session(self):
-		""" Session  -> Facts Question | ( Session ) Session """
 		
-		if self.la=='!' or self.la=='?':
-			self.facts()
-			self.question()
-		elif self.la=='(':
-			self.match('(')
-			self.session()
-			self.match(')')
-			self.session()	
-		else:
-			raise ParseError("in session: !, ? or ( expected")
+       		 if self.la in ("id", "print"):
+           		 self.statement()
+            		 self.session()
+        	elif self.la == None:
+           		 return
+       		else:
+           	   raise ParseError("{} wasn't an 'id', 'print' or 'None' token!".format(self.LA))
+
 			 	
 	
 	def facts(self):
@@ -107,6 +104,26 @@ class MyParser:
 			return
 		else:
 			raise ParseError("in facts: ! or ? expected")
+			
+	def statement(self):
+		
+       		 if self.la == "id":
+            		self.match("id")
+            		self.match("=")
+            		self.expr()
+        	elif self.lA == "print":
+           		 self.match("print")
+            		 self.expr()
+        	else:
+            		raise ParseError("{} wasn't an 'id' or 'print' token!".format(self.la))
+	
+	def expr(self):
+		
+        	if self.la in ("(","id", "binary_num"):
+          		 self.term()
+           		 self.term_tail()
+       		 else:
+            		raise ParseError("{} wasn't an '(', 'id' or 'binaty_num' token!".format(self.la)
 	
 	
 	def fact(self):
