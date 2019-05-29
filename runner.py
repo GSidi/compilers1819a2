@@ -9,38 +9,48 @@ class ParseError(Exception):
 
 
 class MyParser:
+	
 	""" A class encapsulating all parsing functionality
 	for a particular grammar. """
 	
 	def create_scanner(self,fp):
-		""" Creates a plex scanner for a particular grammar 
-		to operate on file object fp. """
-
-		# define some pattern constructs
-		letter = plex.Range("AZaz")
-		digit = plex.Range("09")
-
-		string = plex.Rep1(letter | digit)
-		operator = plex.Any("!?()")		
-		space = plex.Any(" \t\n")
-
-		# the scanner lexicon - constructor argument is a list of (pattern,action ) tuples
-		lexicon = plex.Lexicon([
-			(operator,plex.TEXT),
-			(space,plex.IGNORE),
-			(string, 'string')
-			])
 		
 		# create and store the scanner object
-		self.scanner = plex.Scanner(lexicon,fp)
-		
+		self.scanner = plex.Scanner(self.LEXICON, fp)
 		# get initial lookahead
-		self.la,self.val = self.next_token()
+       		self.la, self.text = self.next_token()
+		
+	def __init__(self):
+		letter = plex.Range("Azaz")
+		digit  = plex.Range("09")
+		binary = plex.Range("01")
+		id_token= letter + plex.Rep(letter|digit)
+      		and = plex.Str('and')
+        	or= plex.Str('or')
+        	xor = plex.Str('xor')
+        	equals = plex.Str('=')
+        	open_parenthesis= plex.Str('(')
+        	close_parenthesis= plex.Str(')')
+        	print_token = plex.Str('print')
+        	space = plex.Any(' \n\t')
+		binary_num = Rep1(binary)
+		
 
+		# the scanner lexicon - constructor argument is a list of (pattern,action ) tuples
+		self.LEXICON = plex.Lexicon([(space, plex.IGNORE),
+                                    	     (and, 'and'),
+                                             (or, 'or'),
+                                             (xor, 'xor'),
+                                             (equals, '='),
+                                             (print_token, 'print'),
+                                             (open_parenthesis, '('),
+                                             (close_parenthesis, ')'),
+                                             (binary_num, 'binary_num'),
+                                             (id_token, 'id')])
+				
 
 	def next_token(self):
 		""" Returns tuple (next_token,matched-text). """
-		
 		return self.scanner.read()		
 
 	
@@ -56,7 +66,7 @@ class MyParser:
 		Raises ParseError if anything else is found. Acquires new lookahead. """ 
 		
 		if self.la==token:
-			self.la,self.val = self.next_token()
+			self.la,self.text = self.next_token()
 		else:
 			raise ParseError("found {} instead of {}".format(self.la,token))
 	
@@ -135,4 +145,3 @@ with open("recursive-descent-parsing.txt","r") as fp:
 	except ParseError as perr:
 		_,lineno,charno = parser.position()	
 		print("Parser Error: {} at line {} char {}".format(perr,lineno,charno+1))
-
