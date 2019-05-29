@@ -54,14 +54,6 @@ class MyParser:
 		""" Returns tuple (next_token,matched-text). """
 		return self.scanner.read()		
 
-	
-	def position(self):
-		""" Utility function that returns position in text in case of errors.
-		Here it simply returns the scanner position. """
-		
-		return self.scanner.position()
-	
-
 	def match(self,token):
 		""" Consumes (matches with current lookahead) an expected token.
 		Raises ParseError if anything else is found. Acquires new lookahead. """ 
@@ -71,7 +63,6 @@ class MyParser:
 		else:
 			raise ParseError("found {} instead of {}".format(self.la,token))
 	
-	
 	def parse(self,fp):
 		""" Creates scanner for input file object fp and calls the parse logic code. """
 		
@@ -79,33 +70,19 @@ class MyParser:
 		self.create_scanner(fp)
 		
 		# call parsing logic
-		self.session()
+		self.stmt_list()
 	
-			
-	def session(self):
+	def stmt_list(self):
 		
        		 if self.la in ("id", "print"):
-           		 self.statement()
-            		 self.session()
+           		 self.stmt()
+            		 self.stmt_list()
         	elif self.la == None:
            		 return
        		else:
-           	   raise ParseError("{} wasn't an 'id', 'print' or 'None' token!".format(self.LA))
+           	   raise ParseError("{} wasn't an 'id', 'print' or 'None' token!".format(self.la))
 
-			 	
-	
-	def facts(self):
-		""" Facts -> Fact Facts | ε """
-		
-		if self.la=='!':
-			self.fact()
-			self.facts()
-		elif self.la=='?':	# from FOLLOW set!
-			return
-		else:
-			raise ParseError("in facts: ! or ? expected")
-			
-	def statement(self):
+	def stmt(self):
 		
        		 if self.la == "id":
             		self.match("id")
@@ -123,27 +100,27 @@ class MyParser:
           		 self.term()
            		 self.term_tail()
        		 else:
-            		raise ParseError("{} wasn't an '(', 'id' or 'binaty_num' token!".format(self.la)
+            		raise ParseError("{} wasn't an '(', 'id' or 'binary_num' token!".format(self.la)
 	
 	
-	def fact(self):
-		""" Fact -> ! string """
-		
-		if self.la=='!':
-			self.match('!')
-			self.match('string')
-		else:
-			raise ParseError("in fact: ! expected")
-			 	
+	def term_tail(self):
+       
+		if self.la == "xor": 
+           		 self.match("xor")
+            		 self.term()
+            		 self.term_tail()
+       		 elif self.LA in ("id", "print", ")", None):
+           		 return
+        	 else:
+           		 raise ParseError("{} wasn't an 'xor', 'id', 'print' or ')' token!".format(self.la))
 
-	def question(self):
-		""" Question -> ? string """
-		
-		if self.la=='?':
-			self.match('?')
-			self.match('string')
-		else:
-			raise ParseError("in question: ? expected")
+   	 def term(self):
+        	if self.LA in ("(","id", "binary_num"):
+           		 self.factor()
+            		 self.factor_tail()
+       		 else:
+			raise ParseError("{} wasn't an '(', 'id' or 'binary_num' token!".format(self.la))
+
 
 		
 # the main part of prog
