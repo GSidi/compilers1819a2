@@ -9,7 +9,7 @@ class ParseError(Exception):
 
 
 
-class MyParser:
+class myParser:
 	
 	""" A class encapsulating all parsing functionality
 	for a particular grammar. """
@@ -164,9 +164,9 @@ class MyParser:
 # the main part of prog
 
 # create the parser object
-parser = MyParser()
+parser = myParser()
 
 # open file for parsing
-with open('test.txt', 'r') as fp:
-	parser.parse(fp)
+with open("test.txt") as fp:
+    parser.parse(fp)
 
