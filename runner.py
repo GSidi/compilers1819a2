@@ -152,6 +152,6 @@ class MyParser:
        		 else:
            		 raise ParseError("{} wasn't an '(', 'id' or 'binary_num' token!".format(self.la))
 
-parser = myParser()
+parser = MyParser()
 with open("test.txt") as fp:
     parser.parse(fp)
