@@ -25,8 +25,8 @@ class MyParser:
 		digit  = plex.Range("09")
 		binary = plex.Range("01")
 		id_token= letter + plex.Rep(letter|digit)
-      		and = plex.Str('and')
-        	or= plex.Str('or')
+      		and_token = plex.Str('and')
+        	or_token= plex.Str('or')
         	xor = plex.Str('xor')
         	equals = plex.Str('=')
         	open_parenthesis= plex.Str('(')
@@ -38,8 +38,8 @@ class MyParser:
 
 		# the scanner lexicon - constructor argument is a list of (pattern,action ) tuples
 		self.LEXICON = plex.Lexicon([(space, plex.IGNORE),
-                                    	     (and, 'and'),
-                                             (or, 'or'),
+                                    	     (and_token, 'and'),
+                                             (or_token, 'or'),
                                              (xor, 'xor'),
                                              (equals, '='),
                                              (print_token, 'print'),
@@ -52,14 +52,6 @@ class MyParser:
 	def next_token(self):
 		""" Returns tuple (next_token,matched-text). """
 		return self.scanner.read()		
-
-	
-	def position(self):
-		""" Utility function that returns position in text in case of errors.
-		Here it simply returns the scanner position. """
-		
-		return self.scanner.position()
-	
 
 	def match(self,token):
 		""" Consumes (matches with current lookahead) an expected token.
@@ -78,70 +70,88 @@ class MyParser:
 		self.create_scanner(fp)
 		
 		# call parsing logic
-		self.session()
+		self.stmt_list(self)
+		 	
 	
-			
-	def session(self):
-		""" Session  -> Facts Question | ( Session ) Session """
-		
-		if self.la=='!' or self.la=='?':
-			self.facts()
-			self.question()
-		elif self.la=='(':
-			self.match('(')
-			self.session()
-			self.match(')')
-			self.session()	
-		else:
-			raise ParseError("in session: !, ? or ( expected")
-			 	
+	def stmt_list(self):
+       		 if self.la in ("id", "print"):
+          		  self.stmt()
+       	     		  self.stmt_list()
+        	 elif self.la == None:
+           		  return
+        	 else:
+           	      raise ParseError("{} wasn't an 'id', 'print' or 'None' token!".format(self.la))
 	
-	def facts(self):
-		""" Facts -> Fact Facts | ε """
-		
-		if self.la=='!':
-			self.fact()
-			self.facts()
-		elif self.la=='?':	# from FOLLOW set!
-			return
-		else:
-			raise ParseError("in facts: ! or ? expected")
-	
-	
-	def fact(self):
-		""" Fact -> ! string """
-		
-		if self.la=='!':
-			self.match('!')
-			self.match('string')
-		else:
-			raise ParseError("in fact: ! expected")
-			 	
+	 def stmt(self):
+       		 if self.la == 'id':
+		    	varname = self.text
+           		 self.match('id')
+            		 self.match('=')
+            		 self.st[varname] = self.expr()
+       		 elif self.la == 'print':
+          		  self.match('print')
+           		  print('{:b}'.format(self.expr()))
+        	else:
+            		raise ParseError("{} wasn't an 'id' or 'print' token!".format(self.la))
 
-	def question(self):
-		""" Question -> ? string """
-		
-		if self.la=='?':
-			self.match('?')
-			self.match('string')
-		else:
-			raise ParseError("in question: ? expected")
+    	def expr(self):
+      		 if self.LA in ('(', 'id', 'binary_num'):
+           	 	t = self.term()
+           		while self.la == 'xor':
+               		    self.match('xor')
+                	    t2 = self.term()
+                	    t ^= t2
+           	 if self.la in ('id', 'print', ')', None):
+               		    return t
+		    	    raise ParseError("{} wasn't an 'id', 'print', ')' or 'None' token!".format(self.la))
+        	 else:
+           		     raise ParseError("{} wasn't an '(', 'id' or 'binary_num' token!".format(self.la))
 
-		
-# the main part of prog
+    	def term(self):
+        	if self.la in ('(', 'id', 'binary_num'):
+           		 f = self.factor()
+		    	while self.la == 'or':
+                		self.match('or')
+               		  	f2 = self.factor()
+               			f |= f2
+            	if self.la in ('xor', 'id', 'print', ')', None):
+                	return f
+            		raise ParseError("{} wasn't an 'xor', 'id', 'print', ')' or 'None' token!".format(self.la))
+       	        else:
+           		raise ParseError("{} wasn't an '(', 'id' or 'binary_num' token!".format(self.la))
 
-# create the parser object
-parser = MyParser()
+   	 def factor(self):
+        	if self.LA in ('(', 'id', 'binary_num'):
+            		a = self.atom()
+            	      while self.la == 'and':
+               		 self.match('and')
+                	 a2 = self.atom()
+                	 a &= a2
+		if self.la in ('or', 'xor', 'id', 'print', ')', None):
+                	return a
+            		raise ParseError("{} wasn't an 'or' ,'xor', 'id', 'print', ')' or 'None' token!".format(self.la))
+        	else:
+           		 raise ParseError("{} wasn't an '(', 'id' or 'b_num' token!".format(self.la))
 
-# open file for parsing
-with open("recursive-descent-parsing.txt","r") as fp:
+    	def atom(self):
+        	if self.la == '(':
+            		self.match('(')
+           		e = self.expr()
+            		self.match(')')
+            		return e
+      	        elif self.LA == 'id':
+            		varname = self.text
+            		self.match('id')
+            	if varname in self.ST:
+               		return self.st[varname]
+            		raise ParseError("{} was not in in self.ST expected!".format(varname))
+       		elif self.la == 'binary_num':
+		    binary_value = int(self.text, 2)
+            	    self.match('binary_num')
+           	    return binary_value
+       		 else:
+           		 raise ParseError("{} wasn't an '(', 'id' or 'binary_num' token!".format(self.la))
 
-	# parse file
-	try:
-		parser.parse(fp)
-	except plex.errors.PlexError:
-		_,lineno,charno = parser.position()	
-		print("Scanner Error: at line {} char {}".format(lineno,charno+1))
-	except ParseError as perr:
-		_,lineno,charno = parser.position()	
-		print("Parser Error: {} at line {} char {}".format(perr,lineno,charno+1))
+parser = myParser()
+with open("test.txt") as fp:
+    parser.parse(fp)
