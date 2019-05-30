@@ -41,7 +41,7 @@ class MyParser:
                                              (binary_num, 'binary_num'),
                                              (id_token, 'id')])
 	
-		self.ST = {}
+		self.st = {}
 		
 	def create_scanner(self,fp):
 		self.scanner = plex.Scanner(self.LEXICON, fp)
