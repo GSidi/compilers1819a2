@@ -167,6 +167,6 @@ class MyParser:
 parser = MyParser()
 
 # open file for parsing
-with open('new.txt', 'r') as fp:
+with open('test.txt', 'r') as fp:
 	parser.parse(fp)
 
