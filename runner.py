@@ -70,7 +70,7 @@ class MyParser:
 		self.create_scanner(fp)
 		
 		# call parsing logic
-		self.stmt_list(self)
+		self.stmt_list()
 		 	
 	
 	def stmt_list(self):
@@ -95,7 +95,7 @@ class MyParser:
             		raise ParseError("{} wasn't an 'id' or 'print' token!".format(self.la))
 
     	def expr(self):
-      		 if self.LA in ('(', 'id', 'binary_num'):
+      		 if self.la in ('(', 'id', 'binary_num'):
            	 	t = self.term()
            		while self.la == 'xor':
                		    self.match('xor')
@@ -121,7 +121,7 @@ class MyParser:
            		raise ParseError("{} wasn't an '(', 'id' or 'binary_num' token!".format(self.la))
 
    	 def factor(self):
-        	if self.LA in ('(', 'id', 'binary_num'):
+        	if self.la in ('(', 'id', 'binary_num'):
             		a = self.atom()
             	      while self.la == 'and':
                		 self.match('and')
@@ -139,10 +139,10 @@ class MyParser:
            		e = self.expr()
             		self.match(')')
             		return e
-      	        elif self.LA == 'id':
+      	        elif self.la == 'id':
             		varname = self.text
             		self.match('id')
-            	if varname in self.ST:
+            	if varname in self.st:
                		return self.st[varname]
             		raise ParseError("{} was not in in self.ST expected!".format(varname))
        		elif self.la == 'binary_num':
