@@ -14,13 +14,6 @@ class MyParser:
 	""" A class encapsulating all parsing functionality
 	for a particular grammar. """
 	
-	def create_scanner(self,fp):
-		
-		# create and store the scanner object
-		self.scanner = plex.Scanner(self.LEXICON, fp)
-		# get initial lookahead
-       		self.la, self.text = self.next_token()
-		
 	def __init__(self):
 		letter = plex.Range("Azaz")
 		digit  = plex.Range("09")
@@ -49,7 +42,13 @@ class MyParser:
                                              (binary_num, 'binary_num'),
                                              (id_token, 'id')])
 				
-
+	def create_scanner(self,fp):
+		
+		# create and store the scanner object
+		self.scanner = plex.Scanner(self.LEXICON, fp)
+		# get initial lookahead
+       		self.la, self.text = self.next_token()
+		
 	def next_token(self):
 		""" Returns tuple (next_token,matched-text). """
 		return self.scanner.read()		
