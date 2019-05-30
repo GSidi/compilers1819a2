@@ -167,15 +167,6 @@ class MyParser:
 parser = MyParser()
 
 # open file for parsing
-with open("test.txt") as fp:
-
-	# parse file
-	try:
-		parser.parse(fp)
-	except plex.errors.PlexError:
-		_,lineno,charno = parser.position()	
-		print("Scanner Error: at line {} char {}".format(lineno,charno+1))
-	except ParseError as perr:
-		_,lineno,charno = parser.position()	
-		print("Parser Error: {} at line {} char {}".format(perr,lineno,charno+1))
+with open('new.txt', 'r') as fp:
+	parser.parse(fp)
 
