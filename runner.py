@@ -47,7 +47,8 @@ class MyParser:
                                              (close_parenthesis, ')'),
                                              (binary_num, 'binary_num'),
                                              (id_token, 'id')])
-				
+	
+		self.ST = {}
 
 	def next_token(self):
 		""" Returns tuple (next_token,matched-text). """
