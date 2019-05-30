@@ -88,7 +88,7 @@ class MyParser:
             		self.match("id")
             		self.match("=")
             		self.expr()
-        	elif self.lA == "print":
+        	elif self.la == "print":
            		 self.match("print")
             		 self.expr()
         	else:
@@ -109,7 +109,7 @@ class MyParser:
            		 self.match("xor")
             		 self.term()
             		 self.term_tail()
-       		 elif self.LA in ("id", "print", ")", None):
+       		 elif self.la in ("id", "print", ")", None):
            		 return
         	 else:
            		 raise ParseError("{} wasn't an 'xor', 'id', 'print' or ')' token!".format(self.la))
